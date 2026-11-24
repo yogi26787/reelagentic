@@ -1,0 +1,55 @@
+// Effect registry: storyboard "effect" names. Keep one name per line (render.py reads this list).
+import type {FX} from "../kit";
+import {HookTitle, TextBehind, SplitHeadline, LEDSign, Stamp, TapeLabel, LowerThird, Callout, WordSlam, TypeOn} from "./text";
+import {AppCard, WebsiteCard, SearchBar, PromptTyping, CursorClick, Polaroid, CardDrop, ImageCard, LogoGrid} from "./cards";
+import {MoneyCounter, BarChart, ProgressRings, StockTicker, PriceDrop, Checklist, MythFact, TierList, Versus, StatCard} from "./data";
+import {DMNotification, CommentPost, IPhoneToggle, FollowCTA, LikeBurst} from "./social";
+import {Confetti, EmojiBurst, FlipCountdown, KeyRain, RoomTunnel, GlobeFlight, MapPin, LocationTag, FaceLock, ReelsOrbit, Spotlight} from "./motion";
+
+export const effects: Record<string, FX> = {
+  HookTitle,
+  TextBehind,
+  SplitHeadline,
+  LEDSign,
+  Stamp,
+  TapeLabel,
+  LowerThird,
+  Callout,
+  WordSlam,
+  TypeOn,
+  AppCard,
+  WebsiteCard,
+  SearchBar,
+  PromptTyping,
+  CursorClick,
+  Polaroid,
+  CardDrop,
+  ImageCard,
+  LogoGrid,
+  MoneyCounter,
+  BarChart,
+  ProgressRings,
+  StockTicker,
+  PriceDrop,
+  Checklist,
+  MythFact,
+  TierList,
+  Versus,
+  StatCard,
+  DMNotification,
+  CommentPost,
+  IPhoneToggle,
+  FollowCTA,
+  LikeBurst,
+  Confetti,
+  EmojiBurst,
+  FlipCountdown,
+  KeyRain,
+  RoomTunnel,
+  GlobeFlight,
+  MapPin,
+  LocationTag,
+  FaceLock,
+  ReelsOrbit,
+  Spotlight,
+};

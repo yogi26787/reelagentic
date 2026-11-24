@@ -1,0 +1,14 @@
+{
+  "name": "reel-maker-by-yogi",
+  "owner": {
+    "name": "Yogi"
+  },
+  "plugins": [
+    {
+      "name": "reel-maker",
+      "source": "./",
+      "description": "Reel Maker by Yogi: Claude edits your raw videos into finished reels"
+    }
+  ],
+  "description": "Reel Maker by Yogi: local marketplace"
+}
