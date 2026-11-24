@@ -202,28 +202,53 @@ def vfilter(info, fit, grade="", xexpr=None):
     return f"{tm}scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},fps={FPS},setsar=1" + (f",{grade}" if grade else "")
 
 
+def frames(segs) -> list:
+    """Output frames per segment, from the cumulative edl timeline so rounding never adds up."""
+    out, c = [], 0.0
+    for seg in segs:
+        d = (seg[1] - seg[0]) / speed(seg)
+        out.append(round((c + d) * FPS) - round(c * FPS))
+        c += d
+    return out
+
+
 def render(video, segs, out, info, fit, grade="", enhance=True, smooth=False, track=None):
+    """Video segments are concatenated with -c copy; audio goes through sample-exact PCM and is encoded
+    to AAC once (per-segment AAC adds ~20 ms priming each, so 30 segments drifted captions ~0.7 s late)."""
+    sr, spf = 48000, 48000 // FPS
     with tempfile.TemporaryDirectory() as td:
-        parts = []
-        for i, seg in enumerate(segs):
+        vparts, aparts = [], []
+        for i, (seg, n) in enumerate(zip(segs, frames(segs))):
+            if n <= 0:
+                continue
             s, e, sp = seg[0], seg[1], speed(seg)
-            d = (e - s) / sp  # output duration
-            p = Path(td) / f"s{i:04d}.mp4"
+            d = n / FPS  # output duration, exactly n frames / n*spf samples
+            vp, ap = Path(td) / f"s{i:04d}.mp4", Path(td) / f"s{i:04d}.wav"
             vf = vfilter(info, fit, grade, follow_expr(track, s, e) if track else None)
             if sp != 1:
                 vf += f",setpts=PTS/{sp}" + (f",minterpolate=fps={FPS}:mi_mode=mci:mc_mode=aobmc" if smooth and sp < 1 else f",fps={FPS}")
+            vf += ",tpad=stop_mode=clone:stop_duration=1"  # never short of n frames
             cmd = ["ffmpeg", "-y", "-v", "error", "-ss", f"{s:.3f}", "-t", f"{e - s:.3f}", "-i", video,
-                   "-filter_complex", f"[0:v]{vf}[v]", "-map", "[v]"]
+                   "-filter_complex", f"[0:v]{vf}[v]", "-map", "[v]", "-frames:v", str(n), "-an",
+                   "-c:v", "libx264", "-preset", "veryfast", "-crf", "17", "-pix_fmt", "yuv420p", vp]
             if info["has_audio"]:
                 af = ",".join(x for x in [ENHANCE if enhance else "", atempo(sp) if sp != 1 else "",
-                                          f"afade=t=in:st=0:d=0.03,afade=t=out:st={max(d - 0.03, 0):.3f}:d=0.03"] if x)
-                cmd += ["-map", "0:a:0", "-af", af, "-c:a", "aac", "-b:a", "256k", "-ar", "48000", "-ac", "2"]
-            cmd += ["-c:v", "libx264", "-preset", "veryfast", "-crf", "17", "-pix_fmt", "yuv420p", p]
+                                          f"aresample={sr},apad,atrim=end_sample={n * spf}",
+                                          f"afade=t=in:st=0:d=0.03,afade=t=out:st={max(d - 0.03, 0):.4f}:d=0.03"] if x)
+                cmd += ["-map", "0:a:0", "-af", af, "-c:a", "pcm_s16le", "-ar", str(sr), "-ac", "2", ap]
+                aparts.append(ap)
             run(cmd)
-            parts.append(p)
-        lst = Path(td) / "list.txt"
-        lst.write_text("".join(f"file '{p.as_posix()}'\n" for p in parts), encoding="utf-8")
-        run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", lst, "-c", "copy", "-movflags", "+faststart", out])
+            vparts.append(vp)
+        lists = []
+        for name, parts in (("v", vparts), ("a", aparts)):
+            if parts:
+                lst = Path(td) / f"{name}.txt"
+                lst.write_text("".join(f"file '{p.as_posix()}'\n" for p in parts), encoding="utf-8")
+                lists += ["-f", "concat", "-safe", "0", "-i", lst]
+        amap = ["-map", "1:a", "-c:a", "aac", "-b:a", "256k"] if aparts else []
+        run(["ffmpeg", "-y", "-v", "error", *lists, "-map", "0:v", "-c:v", "copy", *amap, "-movflags", "+faststart", out])
+    total, got = sum(frames(segs)) / FPS, probe(out)["duration"]
+    assert abs(got - total) <= 1 / FPS + 1e-3, f"cut.mp4 is {got:.3f}s but the edl totals {total:.3f}s"
 
 
 def selftest():
@@ -242,6 +267,8 @@ def selftest():
     assert (r[0]["s"], r[0]["e"]) == (2.4, 2.6) and (r[1]["s"], r[1]["e"]) == (3.0, 3.4), r
     k3, d3 = remap([{"w": "slow", "s": 1.0, "e": 1.5}], [(0, 2, 0.5)], [])
     assert d3 == 4.0 and (k3[0]["s"], k3[0]["e"]) == (2.0, 3.0), (k3, d3)
+    fr = frames([(0, 0.51)] * 30 + [(0, 1, 0.5)])  # 0.51 s = 15.3 frames: per-segment rounding would lose 9
+    assert sum(fr) == round((30 * 0.51 + 2) * FPS) and fr[-1] == 60, fr
     assert atempo(0.25) == "atempo=0.5,atempo=0.5000" and atempo(2) == "atempo=2.0000"
     fx = follow_expr([[0, 0.2], [2, 0.6], [4, 0.6]], 0, 4)
     ev = lambda t: eval(fx.replace("if(", "_if(").replace("lt(", "_lt("), {"_if": lambda c, a, b: a if c else b, "_lt": lambda a, b: a < b, "t": t})  # noqa: E731

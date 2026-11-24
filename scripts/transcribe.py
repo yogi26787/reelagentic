@@ -6,7 +6,9 @@ Engines: "cpp" = whisper.cpp (default, fast, no Python deps). "python" = OpenAI 
 timestamps through faster-whisper (pip install faster-whisper) or openai-whisper (pip install
 openai-whisper), whichever is installed: slower, but tighter word timing for captions.
 Writes EDIT_DIR/<name>.json: {"language": str, "words": [{"w": str, "s": sec, "e": sec}]}
-Hinglish tip: --lang hi --prompt "Haan toh dosto, aaj hum baat karenge" biases toward Roman Hinglish.
+Hinglish tip: --lang hi --prompt "Hinglish in Roman script: hai, kya, dosto, matlab" biases toward Roman
+Hinglish. Never put the video's own (opening) words in --prompt: whisper.cpp then treats that speech as
+already transcribed and silently skips it. A warning is printed if the first word starts well after speech.
 """
 import argparse
 import hashlib
@@ -42,6 +44,23 @@ def parse(whisper_json: dict) -> list:
             continue
         words.append({"w": t, "s": round(s, 3), "e": round(max(e, s + 0.05), 3)})
     return words
+
+
+def first_sound(wav: Path) -> float:
+    """Start of the first non-silent audio (silencedetect, same threshold cut.py uses)."""
+    from cut import silences
+    sil = silences(wav, -35, 0.3)
+    return sil[0][1] if sil and sil[0][0] <= 0.05 else 0.0
+
+
+def check_start(words: list, sound: float, prompt: str) -> None:
+    """whisper.cpp with a --prompt holding the spoken opening drops that speech without any error."""
+    gap = (words[0]["s"] if words else float("inf")) - sound
+    if gap > 1.5:
+        print("\n" + "!" * 72 + f"\nWARNING: audio starts at {sound:.1f}s but the first transcribed word is at "
+              f"{words[0]['s'] if words else 'none'}s: {gap:.1f}s of speech may be missing from the transcript.\n"
+              + ("Rerun WITHOUT --prompt (a prompt containing the spoken words makes whisper skip them).\n" if prompt
+                 else "Check it is music/noise and not skipped speech.\n") + "!" * 72 + "\n", file=sys.stderr)
 
 
 def python_engine(wav: Path, lang: str, prompt: str, model_name: str):
@@ -89,11 +108,13 @@ def main():
     with tempfile.TemporaryDirectory() as td:
         wav = Path(td) / "a.wav"
         run(["ffmpeg", "-y", "-v", "error", "-i", src, "-vn", "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", wav])
+        sound = first_sound(wav)
         if engine == "python":
             words, lang, used = python_engine(wav, a.lang, a.prompt, py_model)
             out.write_text(json.dumps({"key": key, "language": lang, "engine": used, "words": words}, ensure_ascii=False, indent=0), encoding="utf-8")
             print(f"{len(words)} words ({used}), language={lang} -> {out}")
             print(" ".join(w["w"] for w in words)[:1500])
+            check_start(words, sound, a.prompt)
             return
         cmd = ["whisper-cli", "-m", cfg["model"], "-f", wav, "-l", a.lang, "-ml", "1", "-sow", "-oj",
                "-of", Path(td) / "w", "-np"]
@@ -106,6 +127,7 @@ def main():
     out.write_text(json.dumps({"key": key, "language": lang, "words": words}, ensure_ascii=False, indent=0), encoding="utf-8")
     print(f"{len(words)} words, language={lang} -> {out}")
     print(" ".join(w["w"] for w in words)[:1500])
+    check_start(words, sound, a.prompt)
 
 
 if __name__ == "__main__":

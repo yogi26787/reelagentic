@@ -37,7 +37,8 @@ you yes/no, CTA, music (file, or a trending-audio clip + the full song)? Offer "
 
 ### 2. Listen and cut
 ```
-python3 $RF/transcribe.py VIDEO EDIT --lang auto        # Hindi/Hinglish: --lang hi --prompt "Haan toh dosto, aaj hum baat karenge"
+python3 $RF/transcribe.py VIDEO EDIT --lang auto        # Hindi/Hinglish: --lang hi --prompt "Hinglish in Roman script: hai, kya, dosto"
+                                                        # never put the video's own words in --prompt: whisper.cpp skips that speech (a start-gap WARNING is printed)
                                                         # --engine python: OpenAI Whisper word timestamps (faster-whisper/openai-whisper), tighter captions
 python3 $RF/cut.py VIDEO EDIT --grade auto              # --fit pad for landscape footage, --pause 0.3 for faster pace
 ```
