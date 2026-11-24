@@ -14,23 +14,38 @@ CONF = HOME / "config.json"
 def load() -> dict:
     if not CONF.exists():
         sys.exit("Reel Maker is not set up yet. Run /reel-maker:setup first.")
-    c = json.loads(CONF.read_text())
+    c = json.loads(CONF.read_text(encoding="utf-8"))
     c.setdefault("engine", str(HOME / "engine"))
     c.setdefault("bin", str(HOME / "bin"))
     return c
 
 
+IS_WIN = sys.platform.startswith("win")
+IS_MAC = sys.platform == "darwin"
+
+
+def tool(name: str) -> str:
+    """Executable path: config "tools" override, else PATH lookup (finds npx.cmd / ffmpeg.exe on Windows)."""
+    if CONF.exists():
+        override = json.loads(CONF.read_text(encoding="utf-8")).get("tools", {}).get(name)
+        if override:
+            return override
+    return shutil.which(name) or name
+
+
 def run(cmd, **kw):
-    """Run a command, fail loudly with its stderr."""
-    r = subprocess.run([str(x) for x in cmd], capture_output=True, text=True, **kw)
+    """Run a command, fail loudly with its stderr. UTF-8 output on every OS."""
+    cmd = [str(x) for x in cmd]
+    cmd[0] = tool(cmd[0])
+    r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", **kw)
     if r.returncode != 0:
         sys.exit(f"command failed ({r.returncode}): {' '.join(map(str, cmd))}\n{r.stderr[-3000:]}")
     return r.stdout
 
 
-def need(tool: str, hint: str):
-    if not shutil.which(tool):
-        sys.exit(f"missing `{tool}`. {hint}")
+def need(name: str, hint: str):
+    if not shutil.which(tool(name)):
+        sys.exit(f"missing `{name}`. {hint}")
 
 
 def probe(video) -> dict:

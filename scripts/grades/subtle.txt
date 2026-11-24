@@ -1,0 +1,2 @@
+# Gentle contrast lift, natural colour
+eq=contrast=1.04:saturation=1.03

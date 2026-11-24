@@ -1,0 +1,2 @@
+# Black and white film with grain
+hue=s=0,eq=contrast=1.15,noise=alls=8:allf=t

@@ -3,7 +3,7 @@ import {AbsoluteFill, Audio, Img, OffthreadVideo, Sequence, interpolate, staticF
 import {Captions} from "./Captions";
 import {custom} from "./custom";
 import {effects} from "./effects";
-import {clamp, faceAt, rand, src} from "./kit";
+import {Stage, clamp, faceAt, rand, src} from "./kit";
 import {Theme, makePalette} from "./theme";
 import type {Moment, Story} from "./types";
 
@@ -126,6 +126,7 @@ export const Reel: React.FC<Story> = (s) => {
 
   return (
     <Theme.Provider value={pal}>
+     <Stage.Provider value={{video: s.video, foreground: s.foreground, cam: camStyle}}>
       <AbsoluteFill style={{background: "#000", overflow: "hidden"}}>
         <AbsoluteFill style={camStyle}>
           <OffthreadVideo src={staticFile(s.video)} volume={s.videoVolume ?? 1} />
@@ -160,6 +161,13 @@ export const Reel: React.FC<Story> = (s) => {
         {s.captions && <Captions spec={s.captions} hidden={hideCaps} />}
         {s.progressBar && <div style={{position: "absolute", left: 0, top: 0, height: 10, width: `${(t / s.duration) * 100}%`, background: pal.accent}} />}
         <TransitionOverlay s={s} t={t} />
+        {s.safeZones && (
+          <AbsoluteFill style={{pointerEvents: "none"}}>
+            {[{top: 0, height: "8%", left: 0, right: 0}, {top: "79%", bottom: 0, left: 0, right: 0}, {top: "50%", height: "29%", left: "86%", right: 0}].map((z, i) => (
+              <div key={i} style={{position: "absolute", ...z, background: "rgba(255,0,60,0.28)", outline: "4px dashed rgba(255,0,60,0.9)", outlineOffset: -4}} />
+            ))}
+          </AbsoluteFill>
+        )}
 
         {s.music && (
           <Audio src={src(s.music.src)!} loop trimBefore={Math.round((s.music.startFrom ?? 0) * fps)}
@@ -175,6 +183,7 @@ export const Reel: React.FC<Story> = (s) => {
           </Sequence>
         ))}
       </AbsoluteFill>
+     </Stage.Provider>
     </Theme.Provider>
   );
 };

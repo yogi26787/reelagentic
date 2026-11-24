@@ -53,7 +53,7 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
     out = out_dir / f"{a.name}.json"
     key = stamp(src) + a.lang + a.prompt + cfg["model"]
-    if out.exists() and json.loads(out.read_text()).get("key") == key:
+    if out.exists() and json.loads(out.read_text(encoding="utf-8")).get("key") == key:
         print(f"cached: {out}")
         return
     with tempfile.TemporaryDirectory() as td:
@@ -64,10 +64,10 @@ def main():
         if a.prompt:
             cmd += ["--prompt", a.prompt]
         run(cmd)
-        j = json.loads((Path(td) / "w.json").read_text(errors="replace"))
+        j = json.loads((Path(td) / "w.json").read_text(encoding="utf-8", errors="replace"))
     words = parse(j)
     lang = j.get("result", {}).get("language", a.lang)
-    out.write_text(json.dumps({"key": key, "language": lang, "words": words}, ensure_ascii=False, indent=0))
+    out.write_text(json.dumps({"key": key, "language": lang, "words": words}, ensure_ascii=False, indent=0), encoding="utf-8")
     print(f"{len(words)} words, language={lang} -> {out}")
     print(" ".join(w["w"] for w in words)[:1500])
 

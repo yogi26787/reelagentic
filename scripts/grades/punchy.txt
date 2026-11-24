@@ -1,0 +1,2 @@
+# Punchy creator look: contrast + saturation + slight sharpen
+eq=contrast=1.12:saturation=1.18:gamma=0.97,unsharp=5:5:0.5

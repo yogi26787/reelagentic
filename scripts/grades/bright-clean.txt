@@ -1,0 +1,2 @@
+# Clean bright skin-friendly look
+eq=contrast=1.03:brightness=0.03:saturation=1.06:gamma=1.04

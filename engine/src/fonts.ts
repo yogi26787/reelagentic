@@ -9,6 +9,7 @@ import {loadFont as mono} from "@remotion/google-fonts/JetBrainsMono";
 import {loadFont as montserrat} from "@remotion/google-fonts/Montserrat";
 import {loadFont as poppins} from "@remotion/google-fonts/Poppins";
 import {loadFont as grotesk} from "@remotion/google-fonts/SpaceGrotesk";
+import {loadFont as tiro} from "@remotion/google-fonts/TiroDevanagariHindi";
 
 // Poppins and Baloo 2 carry Devanagari, so Hindi captions work in the default looks.
 export const F = {
@@ -22,5 +23,6 @@ export const F = {
   dmSerif: dmSerif("normal", {weights: ["400"], subsets: ["latin"]}).fontFamily,
   grotesk: grotesk("normal", {weights: ["500", "700"], subsets: ["latin"]}).fontFamily,
   mono: mono("normal", {weights: ["500", "700"], subsets: ["latin"]}).fontFamily,
+  tiro: tiro("normal", {weights: ["400"], subsets: ["latin", "devanagari"]}).fontFamily,
   caveat: caveat("normal", {weights: ["700"], subsets: ["latin"]}).fontFamily,
 };

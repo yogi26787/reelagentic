@@ -1,7 +1,7 @@
 {
   "name": "reel-maker",
-  "version": "0.1.0",
-  "description": "Reel Maker by Yogi: Turns Claude into a reel editor: cuts pauses and retakes, word-by-word captions in 50+ languages, text behind you, motion graphics, zooms, SFX, storyboard approval, 1080x1920 render, cover and post caption. Runs locally on macOS.",
+  "version": "0.2.0",
+  "description": "Reel Maker by Yogi: turns Claude into a reel editor for macOS and Windows. Cuts pauses and retakes, cleans the voice, auto-grades, word-by-word captions in 50+ languages, text behind you and green-screen cutouts, 49 motion effects, beat-synced zooms and transitions, speed ramps, SFX, storyboard approval, Instagram-ready render (-14 LUFS, safe zones), cover and post caption.",
   "author": {
     "name": "Yogi"
   },

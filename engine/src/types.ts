@@ -59,12 +59,17 @@ export type Story = {
   look?: string;
   palette?: Record<string, string>;
   captions?: Captions | null;
-  music?: {src: string; volume?: number; duck?: boolean; startFrom?: number};
+  music?: {src: string; volume?: number; duck?: boolean; startFrom?: number; labelSong?: boolean} | null;
   zooms?: Zoom[];
   transitions?: Transition[];
   broll?: Broll[];
   moments: Moment[];
   faces?: Face[];
   progressBar?: boolean;
+  /** draw Instagram UI safe zones (storyboard stills only) */
+  safeZones?: boolean;
+  /** snap starts to music beats (render.py, needs beats.json); {tolerance} optional */
+  beatSync?: boolean | {tolerance?: number};
+  beats?: number[];
   cover?: {time?: number; title?: string; subtitle?: string; frame?: string; face?: Face | null; style?: string};
 };

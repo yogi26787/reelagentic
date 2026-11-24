@@ -1,3 +1,4 @@
 node_modules/
 engine/src/custom/*.tsx
 .DS_Store
+__pycache__/

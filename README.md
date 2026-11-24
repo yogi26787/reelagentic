@@ -7,12 +7,15 @@ retakes, writes word-by-word captions, adds motion graphics, text behind you, zo
 sound effects, shows you a storyboard to approve, then renders a 1080×1920 MP4 with a cover image
 and a ready-to-paste post caption.
 
-Everything runs on your Mac: whisper.cpp for speech, Apple Vision for the person cut-out, Remotion
-and FFmpeg for rendering. Your videos are never uploaded.
+Works on **macOS and Windows**. Everything runs on your computer: whisper.cpp for speech, Apple
+Vision (macOS) or MediaPipe (Windows) for the person cut-out, Remotion and FFmpeg for rendering. Your
+videos are never uploaded.
 
 ## Install
 
-You need macOS 12+ and [Claude Code](https://claude.com/claude-code), plus:
+You need [Claude Code](https://claude.com/claude-code), plus:
+
+**macOS 12+**
 
 ```bash
 brew install ffmpeg whisper-cpp node
@@ -26,7 +29,27 @@ xcode-select --install
 pip3 install numpy
 ```
 
-Then add the plugin:
+**Windows 10/11**
+
+```powershell
+winget install Gyan.FFmpeg
+```
+
+```powershell
+winget install OpenJS.NodeJS.LTS
+```
+
+Install Python 3.12 from python.org (MediaPipe has no wheels for newer versions yet), then:
+
+```powershell
+python -m pip install numpy mediapipe
+```
+
+For whisper.cpp, download `whisper-bin-x64.zip` from the
+[whisper.cpp releases](https://github.com/ggml-org/whisper.cpp/releases) and unzip it; setup asks
+for the path to `whisper-cli.exe`.
+
+Then add the plugin (same on both):
 
 ```bash
 claude plugin marketplace add yogi26787/reel-maker
@@ -37,8 +60,11 @@ claude plugin install reel-maker@reel-maker-by-yogi
 ```
 
 Start a new Claude Code session and run `/reel-maker:setup`. It installs the render engine into
-`~/.reel-maker/`, compiles the Vision helper, downloads a Whisper model (it asks first) and creates
-your Studio folder.
+`~/.reel-maker/`, sets up the person cut-out (compiles the Apple Vision helper on macOS, downloads
+MediaPipe's two small models on Windows), downloads a Whisper model (it asks first) and creates your
+Studio folder. Already have a video workspace with grade files or
+[video-use](https://github.com/browser-use/video-use)? Pass it with `--workspace` and Reel Maker
+imports the grades and uses its timeline view and Manim animations.
 
 ## Use
 
@@ -56,23 +82,31 @@ best results use Opus at high effort.
 | Feature | How |
 |---|---|
 | Cuts pauses, retakes and fillers | `scripts/cut.py`: silence detection + repeated-phrase retake finder; editable `edl.json` |
+| Voice clean-up (rumble cut, denoise, compression) | `cut.py`, on by default |
+| Auto-enhance and colour grades | `cut.py --grade auto` or one of 8 built-in grades, or your own in `<Studio>/grades/` |
+| Speed ramps and slow motion (optionally interpolated) | a third value on an `edl.json` segment, e.g. `[12.4, 13.4, 0.5]` |
 | Word-by-word captions, 50+ languages, Hindi / Hinglish in Roman or native script | `scripts/transcribe.py` (whisper.cpp); Claude fixes the caption text |
-| 13 caption styles | `engine/src/captionStyles.ts` (pop, karaoke, box, bold-caps, neon, typewriter, hindi…) |
+| 14 caption styles | `engine/src/captionStyles.ts` (pop, karaoke, box, bold-caps, neon, typewriter, lyric, hindi…) |
 | 14 looks + your brand palette | `engine/src/theme.ts`, overridden by `<Studio>/brand/brand.json` |
-| Text behind you | `scripts/vision.py matte` (Apple Vision person segmentation) |
+| Text behind you | `scripts/vision.py matte` (Apple Vision on macOS, MediaPipe on Windows) |
+| Green screen, colour pop, cutout outline, echo trail | `BackgroundSwap`, `ColorPop`, `PersonOutline`, `PersonEcho` effects |
 | Face lock-on, zoom focus, title placed off your face, best cover frame | `scripts/vision.py faces` |
-| 45 motion effects | `engine/src/effects/` — list them with `python3 scripts/catalog.py` |
+| 49 motion effects | `engine/src/effects/` — list them with `python3 scripts/catalog.py` |
 | Punch / smooth / shake zooms; whip, glitch, flash, film burn, light leak transitions | `zooms` and `transitions` in the storyboard |
 | B-roll (full, picture-in-picture, split) | `broll` in the storyboard |
 | Sound effects | 17 synthesised SFX in your Studio; add your own to `sfx/` |
 | Music that ducks under speech | `music` in the storyboard |
+| Beat markers and beat-synced edits | `scripts/beats.py` + `"beatSync": true` |
+| Trending audio: find where a clip sits in the full song | `scripts/song_offset.py` |
+| Label songs: upload copy without music + preview with it | `"music": {"labelSong": true}` |
+| Instagram finishing: -14 LUFS loudness, 320 kbps audio, UI safe-zone checks, cover safe in the 4:5 grid | `scripts/render.py final` |
 | Storyboard before render | `scripts/render.py storyboard` → contact sheet |
 | Reference-reel style match and "my style" memory | `/reel-maker:match-style`, `<Studio>/styles/`, `<Studio>/my-style.md` |
 | Custom effects Claude designs for you | `/reel-maker:new-effect` → `<Studio>/custom-effects/*.tsx`, auto-registered |
 | App and website logos | `scripts/fetch_logo.py <domain>` |
 | Reel cover + post caption | rendered with every final export |
 
-Effects include: hook titles, text behind you, split headlines, LED sign, stamps, tape labels, lower
+Effects include: green screen, colour pop, cutout outline, echo trail, hook titles, text behind you, split headlines, LED sign, stamps, tape labels, lower
 thirds, callout arrows, app / website / search cards, prompt typing, cursor clicks, polaroids, card
 drops, logo grids, money counter, glass bar charts, progress rings, stock ticker, price drop,
 checklist, myth vs fact, tier list, versus, DM notifications, a comment that posts, iPhone toggles,
@@ -91,7 +125,8 @@ engine/           Remotion project: Reel + Cover compositions, captions, looks, 
 
 ## Notes
 
-- **Mac only.** The person cut-out and face detection use Apple's Vision framework.
+- **macOS and Windows.** Only the person cut-out differs: Apple Vision on macOS, MediaPipe on
+  Windows (you can also choose MediaPipe on macOS with `setup.py --vision mediapipe`).
 - **Whisper model.** `small` is a good default; `large-v3-turbo` is best for Hindi/Hinglish. Larger
   models give better word timing, which means better-synced captions.
 - **HDR phone footage** needs an FFmpeg built with zimg (`brew install ffmpeg-full`) for tone mapping.

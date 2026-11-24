@@ -1,11 +1,16 @@
 // Shared building blocks for effects (built-in and custom). Custom effects import from "../kit".
-import React from "react";
+import React, {createContext, useContext} from "react";
 import {interpolate, spring, staticFile, useCurrentFrame, useVideoConfig} from "remotion";
 import {Palette, useTheme} from "./theme";
 import type {Face} from "./types";
 
 export {useTheme};
 export type {Palette};
+
+/** The footage, the person cut-out and the current camera transform, for effects that work on the video itself. */
+export type StageInfo = {video: string; foreground?: string; cam: React.CSSProperties};
+export const Stage = createContext<StageInfo>({video: "", cam: {}});
+export const useStage = () => useContext(Stage);
 
 /** Every effect receives its moment props `p`, its length in frames `dur`, and faces (if analysed). */
 export type FXProps = {p: Record<string, any>; dur: number; faces?: Face[]; at: number};

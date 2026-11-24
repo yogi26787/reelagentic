@@ -1,7 +1,7 @@
 // Caption styles. mode decides grouping/animation; colours fall back to the look's palette.
 // "accent" / "fg" / "bg" are palette references.
 export type CaptionStyle = {
-  mode: "group" | "karaoke" | "box" | "one" | "typewriter";
+  mode: "group" | "karaoke" | "box" | "one" | "typewriter" | "lyric";
   font: string; // FONTS key or "display" / "body"
   size: number;
   weight: number;
@@ -29,5 +29,6 @@ export const CAPTION_STYLES: Record<string, CaptionStyle> = {
   comic: {mode: "group", font: "bangers", size: 96, weight: 400, upper: true, color: "#FFFFFF", active: "accent", stroke: 12, maxWords: 2, pop: true},
   "serif-classic": {mode: "karaoke", font: "dmSerif", size: 70, weight: 400, color: "rgba(255,255,255,0.6)", active: "#FFFFFF", glow: "0 2px 16px rgba(0,0,0,.6)", maxWords: 4, italic: true},
   "one-word": {mode: "one", font: "montserrat", size: 120, weight: 900, upper: true, color: "#FFFFFF", active: "#FFFFFF", stroke: 12, maxWords: 1, pop: true},
+  lyric: {mode: "lyric", font: "tiro", size: 56, weight: 400, color: "#F2EADB", active: "#E2A93B", glow: "0 2px 12px rgba(0,0,0,.45)", maxWords: 6},
   hindi: {mode: "group", font: "baloo", size: 80, weight: 800, color: "#FFFFFF", active: "accent", stroke: 10, maxWords: 3, pop: true},
 };

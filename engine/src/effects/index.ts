@@ -5,6 +5,7 @@ import {AppCard, WebsiteCard, SearchBar, PromptTyping, CursorClick, Polaroid, Ca
 import {MoneyCounter, BarChart, ProgressRings, StockTicker, PriceDrop, Checklist, MythFact, TierList, Versus, StatCard} from "./data";
 import {DMNotification, CommentPost, IPhoneToggle, FollowCTA, LikeBurst} from "./social";
 import {Confetti, EmojiBurst, FlipCountdown, KeyRain, RoomTunnel, GlobeFlight, MapPin, LocationTag, FaceLock, ReelsOrbit, Spotlight} from "./motion";
+import {BackgroundSwap, ColorPop, PersonOutline, PersonEcho} from "./cutout";
 
 export const effects: Record<string, FX> = {
   HookTitle,
@@ -52,4 +53,8 @@ export const effects: Record<string, FX> = {
   FaceLock,
   ReelsOrbit,
   Spotlight,
+  BackgroundSwap,
+  ColorPop,
+  PersonOutline,
+  PersonEcho,
 };

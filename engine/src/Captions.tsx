@@ -44,6 +44,22 @@ export const Captions: React.FC<{spec: CaptionSpec; hidden: boolean}> = ({spec, 
   const enter = st.pop ? spring({frame: frame - Math.round(g[0].s * fps), fps, config: {stiffness: 260, damping: 18}}) : 1;
   const upper = spec.uppercase ?? st.upper;
 
+  if (st.mode === "lyric") {
+    // two lines: line one in colour, line two in the active colour from its first sung word; soft fade + 6px rise
+    const half = Math.ceil(g.length / 2);
+    const g0 = g[0].s, gEnd = g[g.length - 1].e;
+    const op = Math.min(1, Math.max(0, (t - g0 + 0.05) / 0.4), Math.max(0, (gEnd + 0.5 - t) / 0.3));
+    const line = (ws: Word[], color: string, start: number) => (
+      <div style={{color, opacity: t >= start - 0.05 ? 1 : 0, textShadow: glow}}>{ws.map((w) => w.w).join(" ")}</div>
+    );
+    return (
+      <div style={{position: "absolute", left: 120, right: 120, top: `${(spec.position ?? 0.62) * 100}%`, textAlign: "center", fontFamily: font,
+        fontWeight: st.weight, fontSize: size, lineHeight: 1.3, opacity: op, transform: `translateY(calc(-50% + ${(1 - Math.min(1, (t - g0) / 0.4)) * 6}px))`}}>
+        {line(g.slice(0, half), c(st.color), g0)}
+        {g.length > half && line(g.slice(half), c(st.active), g[half].s)}
+      </div>
+    );
+  }
   const shown = st.mode === "one" ? (ai >= 0 ? [g[ai]] : []) : st.mode === "typewriter" ? g.slice(0, ai + 1) : g;
   return (
     <div style={{position: "absolute", left: 70, right: 70, top: `${(spec.position ?? 0.72) * 100}%`, transform: `translateY(-50%) scale(${0.85 + 0.15 * enter})`,

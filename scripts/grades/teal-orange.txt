@@ -1,0 +1,2 @@
+# Teal shadows, warm highlights (cinematic)
+eq=contrast=1.08:saturation=1.05,colorbalance=rs=-0.06:gs=-0.01:bs=0.07:rh=0.06:gh=0.02:bh=-0.06,curves=all='0/0.02 0.5/0.5 1/0.97'
