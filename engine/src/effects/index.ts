@@ -6,6 +6,8 @@ import {MoneyCounter, BarChart, ProgressRings, StockTicker, PriceDrop, Checklist
 import {DMNotification, CommentPost, IPhoneToggle, FollowCTA, LikeBurst} from "./social";
 import {Confetti, EmojiBurst, FlipCountdown, KeyRain, RoomTunnel, GlobeFlight, MapPin, LocationTag, FaceLock, ReelsOrbit, Spotlight} from "./motion";
 import {BackgroundSwap, ColorPop, PersonOutline, PersonEcho} from "./cutout";
+import {Telestrator, StepNumber, KineticType, OverlayClip} from "./extra";
+import {Cube3D, Card3D, Warp3D} from "./three";
 
 export const effects: Record<string, FX> = {
   HookTitle,
@@ -57,4 +59,11 @@ export const effects: Record<string, FX> = {
   ColorPop,
   PersonOutline,
   PersonEcho,
+  Telestrator,
+  StepNumber,
+  KineticType,
+  OverlayClip,
+  Cube3D,
+  Card3D,
+  Warp3D,
 };

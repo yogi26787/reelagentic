@@ -11,6 +11,7 @@ Safe to re-run: updates the engine and keeps the user's Studio files.
 """
 import argparse
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -55,7 +56,9 @@ STUDIO_DIRS = {
     "music": "background music you have the rights to",
     "references": "reference reels you like (files or info). Never reuse their footage/music/text",
     "styles": "style profiles learned from reference reels (JSON)",
-    "grades": "colour grades: one FFmpeg filter chain per .txt (cut.py --grade NAME)",
+    "grades": "colour grades: one FFmpeg filter chain per .txt, or a .cube 3D LUT (cut.py --grade NAME)",
+    "overlays": "transparent clips (WebM/MOV with alpha) for the OverlayClip effect, e.g. from hyperframes_clip.py",
+    "hyperframes": "HyperFrames HTML animation projects (hyperframes_clip.py init/render)",
     "custom-effects": "effects Claude designed for you (.tsx). Auto-registered at render time",
     "Exports": "finished reels, covers and captions",
 }
@@ -82,6 +85,30 @@ def bridges(ws, studio: Path, old: dict) -> dict:
         found["video_use"] = {"helpers": str(vu.resolve() / "helpers"), "python": str(py) if py.exists() else "python3"}
         if (vu / "skills/manim-video/SKILL.md").exists():
             found["manim_skill"] = str(vu.resolve() / "skills/manim-video/SKILL.md")
+    # companion tools from the wider Claude-video ecosystem: used when present, never required
+    if shutil.which("yt-dlp"):
+        found["yt_dlp"] = shutil.which("yt-dlp")
+    fs = Path.home() / ".claude/skills/ffmpeg-skill/scripts"
+    if fs.exists():
+        found["ffmpeg_skill"] = str(fs)
+    try:
+        node_major = int(subprocess.run([tool("node"), "--version"], capture_output=True, text=True).stdout.strip().lstrip("v").split(".")[0])
+    except (OSError, ValueError):
+        node_major = 0
+    if node_major >= 22:
+        found["hyperframes"] = "npx hyperframes (Node %d)" % node_major
+    for mod, name in (("faster_whisper", "faster-whisper"), ("whisper", "openai-whisper")):
+        try:
+            __import__(mod)
+            found["asr_python"] = name
+            break
+        except ImportError:
+            continue
+    skills_dir = Path.home() / ".claude/skills"
+    if skills_dir.exists():
+        vs = sorted(d.name for d in skills_dir.iterdir() if d.is_dir() and re.search(r"three|motion|hyperframes|ffmpeg|manim|remotion|video|broll|kinetic", d.name))
+        if vs:
+            found["video_skills"] = vs
     if ws:
         found["workspace"] = str(ws)
         oh = ws / "tools/open-higgsfield"

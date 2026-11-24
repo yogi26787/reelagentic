@@ -1,0 +1,29 @@
+{
+  "name": "kinetic-hype",
+  "builtIn": true,
+  "for": "product launches, tool reveals, hype promos (12-30 s)",
+  "look": "neon-night",
+  "grade": "punchy",
+  "captions": {
+    "style": "neon",
+    "position": 0.74
+  },
+  "beatSync": true,
+  "effects": [
+    "KineticType on beats",
+    "Cube3D / Warp3D for the reveal",
+    "AppCard",
+    "StatCard"
+  ],
+  "zooms": "punch on every second beat, 1.15-1.3",
+  "transitions": [
+    "whip on section changes",
+    "zoom-blur into the reveal"
+  ],
+  "sfx": [
+    "whoosh",
+    "impact",
+    "riser before the reveal"
+  ],
+  "pace": "a change every 1-2 s"
+}

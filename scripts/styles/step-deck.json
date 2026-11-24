@@ -1,0 +1,27 @@
+{
+  "name": "step-deck",
+  "builtIn": true,
+  "for": "numbered tips and listicles (3-7 tips)",
+  "look": "creator-yellow",
+  "grade": "bright-clean",
+  "captions": {
+    "style": "bold-caps",
+    "position": 0.76
+  },
+  "effects": [
+    "HookTitle",
+    "StepNumber for each tip",
+    "WordSlam on the key phrase",
+    "Checklist recap",
+    "FollowCTA"
+  ],
+  "zooms": "punch on each tip number",
+  "transitions": [
+    "flash between tips"
+  ],
+  "sfx": [
+    "pop on each StepNumber",
+    "ding on recap"
+  ],
+  "pace": "one tip every 5-8 s"
+}

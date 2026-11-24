@@ -126,7 +126,7 @@ export const Reel: React.FC<Story> = (s) => {
 
   return (
     <Theme.Provider value={pal}>
-     <Stage.Provider value={{video: s.video, foreground: s.foreground, cam: camStyle}}>
+     <Stage.Provider value={{video: s.video, foreground: s.foreground, cam: camStyle, beats: s.beats}}>
       <AbsoluteFill style={{background: "#000", overflow: "hidden"}}>
         <AbsoluteFill style={camStyle}>
           <OffthreadVideo src={staticFile(s.video)} volume={s.videoVolume ?? 1} />

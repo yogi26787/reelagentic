@@ -1,6 +1,6 @@
 ---
 name: reelagentic
-description: Edit a raw talking-head video into a finished 1080x1920 reel - cut pauses and retakes, word-by-word captions (50+ languages incl. Hindi/Hinglish), text behind the speaker, motion graphics, zooms, transitions, SFX and music, storyboard approval, then render with a cover image and post caption. Use when the user gives a video and asks for a reel/short/edit, or asks to change a reel made with ReelAgentic.
+description: Edit a raw talking-head video (or cut a long video into shorts) into a finished 1080x1920 reel - cut pauses and retakes, word-by-word captions (50+ languages incl. Hindi/Hinglish), text behind the speaker, motion graphics, zooms, transitions, SFX and music, storyboard approval, then render with a cover image and post caption. Use when the user gives a video and asks for a reel/short/edit, or asks to change a reel made with ReelAgentic.
 ---
 
 # ReelAgentic: your AI reel editor
@@ -25,8 +25,8 @@ Works the same on macOS and Windows.
 8. Long renders (>60 s reel) run in the background.
 9. Keep text out of Instagram's UI: `y` between 0.08 and 0.79, nothing right of x 0.86 in the lower
    half. render.py prints `safe zone:` warnings; fix every one. Storyboard stills show the zones in red.
-10. If the user names a style (`<Studio>/styles/<name>.json`), its rules and `never` list beat the
-    defaults below. Workspace house-style notes (e.g. a CLAUDE.md in the video folder) beat both.
+10. If the user names a style (`<Studio>/styles/<name>.json` first, then the built-in
+    `$RF/styles/<name>.json`), its rules and `never` list beat the defaults below. Workspace house-style notes (e.g. a CLAUDE.md in the video folder) beat both.
 
 ## Workflow
 
@@ -38,12 +38,16 @@ you yes/no, CTA, music (file, or a trending-audio clip + the full song)? Offer "
 ### 2. Listen and cut
 ```
 python3 $RF/transcribe.py VIDEO EDIT --lang auto        # Hindi/Hinglish: --lang hi --prompt "Haan toh dosto, aaj hum baat karenge"
+                                                        # --engine python: OpenAI Whisper word timestamps (faster-whisper/openai-whisper), tighter captions
 python3 $RF/cut.py VIDEO EDIT --grade auto              # --fit pad for landscape footage, --pause 0.3 for faster pace
 ```
 cut.py also cleans the voice (rumble cut, denoise, light compression; `--no-enhance` to skip) and
 grades the footage in FFmpeg: `--grade auto` (auto-enhance: levels exposure/saturation), a name from
-`<Studio>/grades/` or the built-ins (`subtle, punchy, teal-orange, warm-dusk, lake-day, sports-punch,
-mono-film, bright-clean`), a filter file, or `none`. Change it later with `cut.py VIDEO EDIT --edl --grade NAME`.
+`<Studio>/grades/` (`.txt` FFmpeg chains or `.cube` 3D LUTs) or the built-ins (`subtle, punchy,
+teal-orange, warm-dusk, lake-day, sports-punch, mono-film, bright-clean`), a file, or `none`.
+**Landscape footage:** `--fit crop` (centre), `--fit pad` (blurred fill), or `--fit follow`, which
+keeps the subject in a moving 9:16 window: run `python3 $RF/track.py VIDEO EDIT --mode face` (people)
+or `--mode motion` (screen recordings: follows the cursor/typing) first. Change it later with `cut.py VIDEO EDIT --edl --grade NAME`.
 **Speed ramps / slow motion:** split a segment in `edl.json` and give the part a third value,
 e.g. `[12.4, 13.4, 0.5]` (half speed; 2 = double), set `"smoothSlowmo": true` for interpolated
 slow-mo, then `cut.py VIDEO EDIT --edl`. Captions and timings follow automatically.
@@ -93,6 +97,14 @@ Assets: `studio:<path>` = file in the Studio folder. App logos: `python3 $RF/fet
 - Licensed / label songs: set `"music": {..., "labelSong": true}`. The final export then has an
   `-upload.mp4` without the music (the user picks the song in Instagram's audio picker so it stays
   licensed and the reel gets the audio page) and a `-preview.mp4` with it.
+
+**Effects beyond the overlays** (all in `catalog.py`):
+- `Telestrator`: freeze the frame and draw circles/arrows on it, sports-replay style.
+- `StepNumber`: giant numeral + word card for numbered tips. `KineticType`: one word per music beat.
+- 3D (three.js): `Cube3D`, `Card3D` (a screenshot on a 3D card), `Warp3D` (hyperspace streaks).
+- `OverlayClip`: any transparent clip on top of the reel. Make one from HTML with HyperFrames:
+  `python3 $RF/hyperframes_clip.py init NAME`, write the animation, then
+  `python3 $RF/hyperframes_clip.py render <Studio>/hyperframes/NAME NAME` → `studio:overlays/NAME.webm`.
 
 **Cutout effects** (need `vision.py matte`): `BackgroundSwap` (green screen, layer behind),
 `ColorPop` (world black-and-white, you in colour, layer behind), `PersonEcho` (delayed trail, layer
@@ -147,8 +159,24 @@ export const VinylSpin: FX = ({p, dur}) => {
 Use only `remotion` + React + `../kit` (no new npm packages). Deterministic: use `rand(seed)`, never
 `Math.random()`. Verify with `render.py storyboard` and look at the still before using it in a reel.
 
-## Companion tools (config `bridges`, set by `setup.py --workspace DIR`)
-Use them when present; skip silently when absent.
+## Long video → shorts
+Use `/reelagentic:shorts` (`shorts.py transcript | snap | extract`): Claude scores segments for hook,
+coherence, emotion, value and payoff, the user picks, each clip is reframed with `track.py` +
+`cut.py --fit follow` and edited like any reel.
+
+## Companion tools (config `bridges`, set by `setup.py`, `--workspace DIR` adds a video workspace)
+Use them when present; skip silently when absent. Suggest installing one only when the user's request needs it.
+- `ffmpeg_skill` (kajisho5/ffmpeg-skill, `npx ffmpeg-skill setup`): finishing jobs ReelAgentic doesn't do
+  itself: `stabilize.py` (shaky footage, before cut.py), `straighten.py` (tilted horizon), `denoise.py`
+  (grainy low light), `redact.py` (blur a plate or a screen), `multicam.py` (sync cameras by audio),
+  `check.py --platform reels` and `report.py` (compliance check + HTML report on final.mp4).
+  Run them as `python3 "<ffmpeg_skill>/<tool>.py" ...`; read its SKILL.md first.
+- `video_skills`: Claude skills found in `~/.claude/skills` (e.g. three.js skills for 3D custom
+  effects, motion-graphics skill packs for kinetic type, explainer and b-roll craft). Read the
+  matching one before writing a custom effect in that area.
+- `asr_python`: faster-whisper / openai-whisper is installed, so `--engine python` works.
+- `yt_dlp`: download reference reels or the user's own long videos (ask first).
+- `hyperframes`: Node 22+ is present, so `hyperframes_clip.py` can render HTML animations.
 - `video_use`: `"<python>" "<helpers>/timeline_view.py" EDIT/cut.mp4 START END` draws a filmstrip +
   waveform PNG: look at it before overriding a doubtful cut or retake.
 - `manim_skill`: for maths, data or diagram explainers, read that SKILL.md, render the animation as a

@@ -1,0 +1,28 @@
+{
+  "name": "clean-minimal",
+  "builtIn": true,
+  "for": "calm educational talking heads, founders, coaches",
+  "look": "natural",
+  "grade": "auto",
+  "captions": {
+    "style": "minimal",
+    "position": 0.74
+  },
+  "effects": [
+    "LowerThird once",
+    "Callout",
+    "ImageCard / Card3D for proof",
+    "Checklist"
+  ],
+  "zooms": "smooth only, 1.08-1.15",
+  "transitions": [],
+  "sfx": [
+    "one soft pop per card at most"
+  ],
+  "never": [
+    "confetti",
+    "glitch",
+    "emoji bursts"
+  ],
+  "pace": "a graphic every 4-6 s"
+}

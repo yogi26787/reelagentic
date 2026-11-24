@@ -1,0 +1,28 @@
+{
+  "name": "hologram-hud",
+  "builtIn": true,
+  "for": "tech, AI, future-of explainers",
+  "look": "matrix",
+  "grade": "teal-orange",
+  "captions": {
+    "style": "typewriter",
+    "position": 0.74
+  },
+  "effects": [
+    "FaceLock with a label",
+    "Warp3D intro",
+    "RoomTunnel",
+    "PromptTyping",
+    "Spotlight"
+  ],
+  "zooms": "shake on reveals",
+  "transitions": [
+    "glitch"
+  ],
+  "sfx": [
+    "glitch",
+    "typing",
+    "riser"
+  ],
+  "pace": "a change every 2-3 s"
+}

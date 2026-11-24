@@ -64,10 +64,12 @@ def resolve_grade(name, video) -> str:
         return auto_grade(video)
     f = Path(name).expanduser()
     if not f.exists():
-        studio = Path(load()["studio"]) / "grades" / f"{name}.txt"
-        f = studio if studio.exists() else PLUGIN / "scripts" / "grades" / f"{name}.txt"
+        dirs = [Path(load()["studio"]) / "grades", PLUGIN / "scripts" / "grades"]
+        f = next((d / f"{name}{ext}" for d in dirs for ext in (".txt", ".cube") if (d / f"{name}{ext}").exists()), f)
     if not f.exists():
-        sys.exit(f"unknown grade {name!r}: add <Studio>/grades/{name}.txt or pass a file")
+        sys.exit(f"unknown grade {name!r}: add <Studio>/grades/{name}.txt (FFmpeg filters) or {name}.cube (3D LUT)")
+    if f.suffix.lower() == ".cube":  # 3D LUT from Resolve/Premiere/phone apps; escape for the filter graph
+        return "lut3d=file='" + f.resolve().as_posix().replace(":", "\\:").replace("'", "\\'") + "'"
     return " ".join(x.strip() for x in f.read_text(encoding="utf-8").splitlines() if x.strip() and not x.startswith("#"))
 
 
@@ -174,22 +176,40 @@ def remap(words, segs, drops=()):
     return out, o
 
 
-def vfilter(info, fit, grade=""):
+def follow_expr(points, s, e) -> str:
+    """Piecewise-linear crop centre (0..1) over segment time t (starts at 0), as an FFmpeg expression.
+    shortcut: <=60 keyframes per segment (nested ifs); for longer segments sample track.py more coarsely."""
+    pts = [(t - s, x) for t, x in points if s - 1 <= t <= e + 1]
+    if not pts:
+        return "0.5"
+    pts = pts[:: max(1, len(pts) // 60)]
+    expr = f"{pts[-1][1]:.4f}"
+    for (t0, x0), (t1, x1) in reversed(list(zip(pts, pts[1:]))):
+        expr = f"if(lt(t,{t1:.3f}),{x0:.4f}+({x1 - x0:.4f})*(t-{t0:.3f})/{max(t1 - t0, 1e-3):.3f},{expr})"
+    return f"if(lt(t,{pts[0][0]:.3f}),{pts[0][1]:.4f},{expr})"
+
+
+def vfilter(info, fit, grade="", xexpr=None):
     tm = "zscale=t=linear:npl=100,format=gbrpf32le,zscale=p=bt709,tonemap=hable:desat=0,zscale=t=bt709:m=bt709:r=tv,format=yuv420p," if info["hdr"] else ""
+    if fit == "follow" and info["width"] > info["height"]:
+        # 9:16 window following track.json; quotes keep the expression's commas out of the filter graph
+        cx = xexpr or "0.5"
+        return (f"{tm}crop=w=ih*9/16:h=ih:x='max(0,min(iw-ih*9/16,({cx})*iw-ih*9/32))':y=0,"
+                f"scale={W}:{H},fps={FPS},setsar=1" + (f",{grade}" if grade else ""))
     if fit == "pad" and info["width"] > info["height"]:
         return (f"{tm}split[a][b];[a]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},gblur=sigma=40[bg];"
                 f"[b]scale={W}:-2[fg];[bg][fg]overlay=(W-w)/2:(H-h)/2,fps={FPS},setsar=1" + (f",{grade}" if grade else ""))
     return f"{tm}scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},fps={FPS},setsar=1" + (f",{grade}" if grade else "")
 
 
-def render(video, segs, out, info, fit, grade="", enhance=True, smooth=False):
+def render(video, segs, out, info, fit, grade="", enhance=True, smooth=False, track=None):
     with tempfile.TemporaryDirectory() as td:
         parts = []
         for i, seg in enumerate(segs):
             s, e, sp = seg[0], seg[1], speed(seg)
             d = (e - s) / sp  # output duration
             p = Path(td) / f"s{i:04d}.mp4"
-            vf = vfilter(info, fit, grade)
+            vf = vfilter(info, fit, grade, follow_expr(track, s, e) if track else None)
             if sp != 1:
                 vf += f",setpts=PTS/{sp}" + (f",minterpolate=fps={FPS}:mi_mode=mci:mc_mode=aobmc" if smooth and sp < 1 else f",fps={FPS}")
             cmd = ["ffmpeg", "-y", "-v", "error", "-ss", f"{s:.3f}", "-t", f"{e - s:.3f}", "-i", video,
@@ -223,6 +243,9 @@ def selftest():
     k3, d3 = remap([{"w": "slow", "s": 1.0, "e": 1.5}], [(0, 2, 0.5)], [])
     assert d3 == 4.0 and (k3[0]["s"], k3[0]["e"]) == (2.0, 3.0), (k3, d3)
     assert atempo(0.25) == "atempo=0.5,atempo=0.5000" and atempo(2) == "atempo=2.0000"
+    fx = follow_expr([[0, 0.2], [2, 0.6], [4, 0.6]], 0, 4)
+    ev = lambda t: eval(fx.replace("if(", "_if(").replace("lt(", "_lt("), {"_if": lambda c, a, b: a if c else b, "_lt": lambda a, b: a < b, "t": t})  # noqa: E731
+    assert abs(ev(1.0) - 0.4) < 1e-6 and ev(3.0) == 0.6 and ev(-1) == 0.2, fx
     print("cut.py selftest ok")
 
 
@@ -235,7 +258,8 @@ def main():
     ap.add_argument("--pause", type=float, default=0.45)
     ap.add_argument("--pad", type=float, default=0.12)
     ap.add_argument("--noise", type=float, default=-35)
-    ap.add_argument("--fit", choices=["crop", "pad"], default="crop")
+    ap.add_argument("--fit", choices=["crop", "pad", "follow"], default="crop",
+                    help="landscape footage: crop centre, pad with blur, or follow the subject (needs track.py first)")
     ap.add_argument("--keep-fillers", action="store_true")
     ap.add_argument("--grade", default=None, help="auto | none | grade name | filter file (default: none)")
     ap.add_argument("--no-enhance", action="store_true", help="skip voice clean-up")
@@ -259,8 +283,15 @@ def main():
     grade = resolve_grade(edl.get("grade", "none"), video)
     edl["gradeFilter"] = grade
     edl_path.write_text(json.dumps(edl, indent=1, ensure_ascii=False), encoding="utf-8")
-    render(video, segs, ed / "cut.mp4", info, edl.get("fit", a.fit), grade,
-           edl.get("enhance", True) and not a.no_enhance, edl.get("smoothSlowmo", False))
+    fit = edl.get("fit", a.fit)
+    track = None
+    if fit == "follow":
+        tf = ed / "track.json"
+        if not tf.exists():
+            sys.exit("--fit follow needs EDIT_DIR/track.json: run track.py VIDEO EDIT_DIR --mode face|motion first")
+        track = json.loads(tf.read_text(encoding="utf-8"))["points"]
+    render(video, segs, ed / "cut.mp4", info, fit, grade,
+           edl.get("enhance", True) and not a.no_enhance, edl.get("smoothSlowmo", False), track)
     drops = [(r["start"], r["end"]) for r in edl.get("removed", []) if r["reason"] != "pause"]
     kept, dur = remap(words, segs, drops)
     (ed / "words_cut.json").write_text(json.dumps({"words": kept}, ensure_ascii=False, indent=0), encoding="utf-8")

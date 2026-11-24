@@ -141,7 +141,7 @@ def check(story, fx, looks, caps):
     dur = story["duration"]
     if story.get("look", "clean") not in looks:
         errs.append(f"unknown look {story.get('look')!r}; have {sorted(looks)}")
-    cs = story.get("captions", {}).get("style", "pop")
+    cs = (story.get("captions") or {}).get("style", "pop")
     if story.get("captions") is not None and cs not in caps:
         errs.append(f"unknown caption style {cs!r}; have {sorted(caps)}")
     for i, m in enumerate(story.get("moments", [])):

@@ -72,6 +72,7 @@ imports the grades and uses its timeline view and Manim animations.
 
 ```
 /reelagentic:edit ~/Movies/take.mp4 fitness tips, energetic, text behind me, follow CTA at the end
+/reelagentic:shorts ~/Videos/podcast.mp4 top 3    # long video -> scored, reframed vertical shorts
 /reelagentic:match-style <reel file or URL>        # learn a reference reel's style
 /reelagentic:new-effect a spinning vinyl record with my logo   # Claude builds a new effect and saves it
 ```
@@ -85,15 +86,18 @@ best results use Opus at high effort.
 |---|---|
 | Cuts pauses, retakes and fillers | `scripts/cut.py`: silence detection + repeated-phrase retake finder; editable `edl.json` |
 | Voice clean-up (rumble cut, denoise, compression) | `cut.py`, on by default |
-| Auto-enhance and colour grades | `cut.py --grade auto` or one of 8 built-in grades, or your own in `<Studio>/grades/` |
+| Auto-enhance, colour grades and 3D LUTs | `cut.py --grade auto`, 8 built-in grades, or your own `.txt` / `.cube` in `<Studio>/grades/` |
 | Speed ramps and slow motion (optionally interpolated) | a third value on an `edl.json` segment, e.g. `[12.4, 13.4, 0.5]` |
-| Word-by-word captions, 50+ languages, Hindi / Hinglish in Roman or native script | `scripts/transcribe.py` (whisper.cpp); Claude fixes the caption text |
+| Word-by-word captions, 50+ languages, Hindi / Hinglish in Roman or native script | `scripts/transcribe.py`: whisper.cpp, or OpenAI Whisper word timestamps via faster-whisper / openai-whisper (`--engine python`) |
+| Long video → shorts: Claude scores segments, snaps to sentences, reframes to 9:16 | `/reelagentic:shorts`, `scripts/shorts.py`, `scripts/track.py` (face or cursor/motion follow), `cut.py --fit follow` |
 | 14 caption styles | `engine/src/captionStyles.ts` (pop, karaoke, box, bold-caps, neon, typewriter, lyric, hindi…) |
 | 14 looks + your brand palette | `engine/src/theme.ts`, overridden by `<Studio>/brand/brand.json` |
 | Text behind you | `scripts/vision.py matte` (Apple Vision on macOS, MediaPipe on Windows) |
 | Green screen, colour pop, cutout outline, echo trail | `BackgroundSwap`, `ColorPop`, `PersonOutline`, `PersonEcho` effects |
 | Face lock-on, zoom focus, title placed off your face, best cover frame | `scripts/vision.py faces` |
-| 49 motion effects | `engine/src/effects/` — list them with `python3 scripts/catalog.py` |
+| 56 motion effects, incl. 3D (three.js), telestrator, step deck, beat-locked kinetic type | `engine/src/effects/` — list them with `python3 scripts/catalog.py` |
+| HTML motion graphics as overlays | `scripts/hyperframes_clip.py` (HyperFrames) + `OverlayClip` |
+| Style presets | 6 built-in (`kinetic-hype`, `step-deck`, `news-flash`, `hologram-hud`, `telestrator-breakdown`, `clean-minimal`) + your own |
 | Punch / smooth / shake zooms; whip, glitch, flash, film burn, light leak transitions | `zooms` and `transitions` in the storyboard |
 | B-roll (full, picture-in-picture, split) | `broll` in the storyboard |
 | Sound effects | 17 synthesised SFX in your Studio; add your own to `sfx/` |
@@ -115,13 +119,35 @@ checklist, myth vs fact, tier list, versus, DM notifications, a comment that pos
 follow CTA, likes, confetti, emoji bursts, flip countdown, keyboard key rain, room tunnel, globe
 flight, map pins, location tag, face lock-on, reels orbiting your head and spotlight.
 
+## Works with the Claude video ecosystem
+
+ReelAgentic runs on its own, and plugs into these open-source projects when you have them:
+
+| Project | How ReelAgentic uses it |
+|---|---|
+| [yt-dlp](https://github.com/yt-dlp/yt-dlp) | downloads reference reels and your own long videos for `/reelagentic:shorts` |
+| [openai/whisper](https://github.com/openai/whisper) / [whisper.cpp](https://github.com/ggml-org/whisper.cpp) | speech-to-text; `--engine python` uses Whisper's word timestamps |
+| [kajisho5/ffmpeg-skill](https://github.com/kajisho5/ffmpeg-skill) | finishing tools: stabilise, straighten, denoise, redact, multicam sync, platform check and HTML report |
+| [ychoi-kr/claude-ffmpeg-skill](https://github.com/ychoi-kr/claude-ffmpeg-skill) | FFmpeg recipe knowledge Claude can read for one-off jobs |
+| [kurbaitaev/ghost-editor](https://github.com/kurbaitaev/ghost-editor) | inspired the telestrator and step-deck effects and named style presets |
+| [AgriciDaniel/claude-shorts](https://github.com/AgriciDaniel/claude-shorts) | inspired long-to-short: segment scoring, sentence snapping, cursor-following reframe |
+| [CloudAI-X/threejs-skills](https://github.com/CloudAI-X/threejs-skills) | reference for 3D custom effects (the engine ships `@remotion/three`) |
+| [iart-ai/motion-skills](https://github.com/iart-ai/motion-skills), [Barty-Bart/motion-graphics](https://github.com/Barty-Bart/motion-graphics), [mattypark/Motion-graphics-skill](https://github.com/mattypark/Motion-graphics-skill) | motion-design craft Claude reads when building custom effects; inspired KineticType and the easing kit |
+| [heygen-com/hyperframes](https://github.com/heygen-com/hyperframes) | renders HTML animations to transparent clips used as overlays |
+| [zhuyansen/awesome-claude-video-skills](https://github.com/zhuyansen/awesome-claude-video-skills) | where to find more |
+
+Not included: MotionClone ([LPengYang](https://github.com/LPengYang/MotionClone),
+[Bujiazi](https://github.com/Bujiazi/MotionClone)) is diffusion research code that needs a large NVIDIA
+GPU and carries no licence, so it can't ship in or run alongside a laptop plugin.
+
 ## Layout
 
 ```
 .claude-plugin/   plugin + marketplace manifests
-commands/         /reelagentic:edit, :setup, :match-style, :new-effect
+commands/         /reelagentic:edit, :shorts, :setup, :match-style, :new-effect
 skills/reelagentic the editing workflow Claude follows
-scripts/          transcribe, cut, vision (Swift), render, catalog, sfx, setup
+scripts/          transcribe, cut, vision (Swift/MediaPipe), track, shorts, beats, song_offset,
+                  hyperframes_clip, render, catalog, sfx, setup; grades/ and styles/ presets
 engine/           Remotion project: Reel + Cover compositions, captions, looks, effects
 ```
 

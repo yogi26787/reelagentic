@@ -1,15 +1,20 @@
 {
   "name": "reelagentic",
-  "version": "0.2.0",
-  "description": "ReelAgentic: your AI reel editor. Turns Claude into a reel editor for macOS and Windows. Cuts pauses and retakes, cleans the voice, auto-grades, word-by-word captions in 50+ languages, text behind you and green-screen cutouts, 49 motion effects, beat-synced zooms and transitions, speed ramps, SFX, storyboard approval, Instagram-ready render (-14 LUFS, safe zones), cover and post caption.",
+  "version": "0.3.0",
+  "description": "ReelAgentic: your AI reel editor. Claude edits raw videos into Instagram-ready reels on macOS and Windows: cuts pauses and retakes, cleans the voice, auto-grades (LUTs too), word-by-word captions in 50+ languages, text behind you and green-screen cutouts, 56 effects incl. 3D, telestrator and beat-locked kinetic type, HyperFrames overlays, long-video-to-shorts with face/cursor reframing, storyboard approval, -14 LUFS export, cover and post caption.",
   "author": {
     "name": "Yogi"
   },
   "keywords": [
-    "video",
-    "reels",
     "captions",
+    "ffmpeg",
+    "hyperframes",
+    "reels",
+    "reframe",
     "remotion",
+    "shorts",
+    "threejs",
+    "video",
     "whisper"
   ],
   "homepage": "https://github.com/yogi26787/reelagentic",

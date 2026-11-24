@@ -8,9 +8,29 @@ export {useTheme};
 export type {Palette};
 
 /** The footage, the person cut-out and the current camera transform, for effects that work on the video itself. */
-export type StageInfo = {video: string; foreground?: string; cam: React.CSSProperties};
+export type StageInfo = {video: string; foreground?: string; cam: React.CSSProperties; beats?: number[]};
 export const Stage = createContext<StageInfo>({video: "", cam: {}});
 export const useStage = () => useContext(Stage);
+
+/** Easing curves for motion design (input/output 0..1). */
+export const easings = {
+  linear: (x: number) => x,
+  outCubic: (x: number) => 1 - Math.pow(1 - x, 3),
+  outExpo: (x: number) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x)),
+  inOutCubic: (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2),
+  outBack: (x: number) => 1 + 2.70158 * Math.pow(x - 1, 3) + 1.70158 * Math.pow(x - 1, 2),
+  outElastic: (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * ((2 * Math.PI) / 3)) + 1),
+};
+
+/** Music beats (reel seconds) that fall inside this moment, as frames relative to its start. */
+export const useMomentBeats = (at: number, dur: number, fps: number) =>
+  (useStage().beats ?? []).map((b) => Math.round((b - at) * fps)).filter((f) => f >= 0 && f < dur);
+
+/** 1 on a beat, decaying to 0 over `len` frames: drive pulses and pops from the music. */
+export const beatPulse = (f: number, beatFrames: number[], len = 8) => {
+  const last = beatFrames.filter((b) => b <= f).pop();
+  return last === undefined ? 0 : Math.max(0, 1 - (f - last) / len);
+};
 
 /** Every effect receives its moment props `p`, its length in frames `dur`, and faces (if analysed). */
 export type FXProps = {p: Record<string, any>; dur: number; faces?: Face[]; at: number};

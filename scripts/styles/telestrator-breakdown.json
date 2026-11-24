@@ -1,0 +1,27 @@
+{
+  "name": "telestrator-breakdown",
+  "builtIn": true,
+  "for": "sports, gameplay or technique breakdowns",
+  "look": "bold-red",
+  "grade": "sports-punch",
+  "captions": {
+    "style": "box",
+    "position": 0.76
+  },
+  "cut": {
+    "slowmo": "replays as [start, end, 0.5] with smoothSlowmo"
+  },
+  "effects": [
+    "Telestrator (freeze + circles/arrows)",
+    "StatCard",
+    "LowerThird"
+  ],
+  "zooms": "punch 1.6-2x on the replay",
+  "transitions": [
+    "flash into the replay"
+  ],
+  "sfx": [
+    "whoosh into replay"
+  ],
+  "pace": "moment, replay, reaction"
+}

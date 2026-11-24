@@ -1,0 +1,28 @@
+{
+  "name": "news-flash",
+  "builtIn": true,
+  "for": "news, updates, 'what just happened' explainers",
+  "look": "news",
+  "grade": "subtle",
+  "captions": {
+    "style": "highlight-bar",
+    "position": 0.74,
+    "uppercase": true
+  },
+  "effects": [
+    "LowerThird with the source",
+    "WebsiteCard of the headline",
+    "StatCard",
+    "Stamp ('BREAKING' / 'CONFIRMED')",
+    "Callout"
+  ],
+  "zooms": "smooth push on the key line",
+  "transitions": [
+    "flash"
+  ],
+  "sfx": [
+    "tick",
+    "stamp"
+  ],
+  "pace": "a card every 3-4 s"
+}
