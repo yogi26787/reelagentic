@@ -1,14 +1,14 @@
 {
-  "name": "reel-maker-by-yogi",
+  "name": "reelagentic",
   "owner": {
     "name": "Yogi"
   },
   "plugins": [
     {
-      "name": "reel-maker",
+      "name": "reelagentic",
       "source": "./",
-      "description": "Reel Maker by Yogi: Claude edits your raw videos into finished reels"
+      "description": "ReelAgentic: your AI reel editor. Claude edits raw videos into finished reels."
     }
   ],
-  "description": "Reel Maker by Yogi: local marketplace"
+  "description": "ReelAgentic: your AI reel editor (by Yogi)"
 }

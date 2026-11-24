@@ -1,4 +1,4 @@
-// rf-vision: Apple Vision helpers for Reel Maker (macOS 12+).
+// rf-vision: Apple Vision helpers for ReelAgentic (macOS 12+).
 //   rf-vision matte <video> <w> <h>   -> raw 8-bit gray person masks, one per frame, on stdout
 //   rf-vision faces <video> <step>    -> JSON face boxes (top-left origin, 0..1) + capture quality every <step> s
 import AVFoundation

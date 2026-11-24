@@ -1,14 +1,14 @@
 ---
-name: reel-maker
-description: Edit a raw talking-head video into a finished 1080x1920 reel - cut pauses and retakes, word-by-word captions (50+ languages incl. Hindi/Hinglish), text behind the speaker, motion graphics, zooms, transitions, SFX and music, storyboard approval, then render with a cover image and post caption. Use when the user gives a video and asks for a reel/short/edit, or asks to change a reel made with Reel Maker.
+name: reelagentic
+description: Edit a raw talking-head video into a finished 1080x1920 reel - cut pauses and retakes, word-by-word captions (50+ languages incl. Hindi/Hinglish), text behind the speaker, motion graphics, zooms, transitions, SFX and music, storyboard approval, then render with a cover image and post caption. Use when the user gives a video and asks for a reel/short/edit, or asks to change a reel made with ReelAgentic.
 ---
 
-# Reel Maker: Claude as the reel editor
+# ReelAgentic: your AI reel editor
 
 Scripts live in `${CLAUDE_PLUGIN_ROOT}/scripts/` (call them `$RF`). Run them with the Python in
-`~/.reel-maker/config.json` → `"python"` (written `python3` below; usually `python` on Windows).
+`~/.reelagentic/config.json` → `"python"` (written `python3` below; usually `python` on Windows).
 Config also holds the Studio folder, Whisper model, vision backend (Apple Vision on macOS,
-MediaPipe on Windows) and `bridges` to companion tools. If it is missing, run `/reel-maker:setup`.
+MediaPipe on Windows) and `bridges` to companion tools. If it is missing, run `/reelagentic:setup`.
 Works the same on macOS and Windows.
 
 ## Hard rules

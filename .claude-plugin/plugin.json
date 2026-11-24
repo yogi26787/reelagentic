@@ -1,7 +1,7 @@
 {
-  "name": "reel-maker",
+  "name": "reelagentic",
   "version": "0.2.0",
-  "description": "Reel Maker by Yogi: turns Claude into a reel editor for macOS and Windows. Cuts pauses and retakes, cleans the voice, auto-grades, word-by-word captions in 50+ languages, text behind you and green-screen cutouts, 49 motion effects, beat-synced zooms and transitions, speed ramps, SFX, storyboard approval, Instagram-ready render (-14 LUFS, safe zones), cover and post caption.",
+  "description": "ReelAgentic: your AI reel editor. Turns Claude into a reel editor for macOS and Windows. Cuts pauses and retakes, cleans the voice, auto-grades, word-by-word captions in 50+ languages, text behind you and green-screen cutouts, 49 motion effects, beat-synced zooms and transitions, speed ramps, SFX, storyboard approval, Instagram-ready render (-14 LUFS, safe zones), cover and post caption.",
   "author": {
     "name": "Yogi"
   },
@@ -12,7 +12,7 @@
     "remotion",
     "whisper"
   ],
-  "homepage": "https://github.com/yogi26787/reel-maker",
-  "repository": "https://github.com/yogi26787/reel-maker",
+  "homepage": "https://github.com/yogi26787/reelagentic",
+  "repository": "https://github.com/yogi26787/reelagentic",
   "license": "MIT"
 }

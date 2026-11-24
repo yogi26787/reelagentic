@@ -17,7 +17,7 @@ for domain in sys.argv[1:]:
     d = urllib.parse.urlparse(domain if "//" in domain else f"https://{domain}").hostname or domain
     out = logos / f"{d.removeprefix('www.')}.png"
     url = f"https://www.google.com/s2/favicons?domain={urllib.parse.quote(d)}&sz=256"
-    req = urllib.request.Request(url, headers={"User-Agent": "reel-maker/0.1"})
+    req = urllib.request.Request(url, headers={"User-Agent": "reelagentic/0.1"})
     with urllib.request.urlopen(req, timeout=20) as r:
         out.write_bytes(r.read())
     print(f"studio:logos/{out.name}")

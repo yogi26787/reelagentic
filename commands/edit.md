@@ -2,7 +2,7 @@
 description: Edit a raw video into a finished reel (captions, cuts, graphics, text behind you, SFX, cover, caption)
 argument-hint: <video path> [one-line brief]
 ---
-Use the reel-maker skill to edit this video into a reel.
+Use the reelagentic skill to edit this video into a reel.
 
 Request: $ARGUMENTS
 

@@ -1,4 +1,6 @@
-# Reel Maker by Yogi
+# ReelAgentic: your AI reel editor
+
+*by Yogi*
 
 A Claude Code plugin that turns Claude into your reel editor.
 
@@ -52,26 +54,26 @@ for the path to `whisper-cli.exe`.
 Then add the plugin (same on both):
 
 ```bash
-claude plugin marketplace add yogi26787/reel-maker
+claude plugin marketplace add yogi26787/reelagentic
 ```
 
 ```bash
-claude plugin install reel-maker@reel-maker-by-yogi
+claude plugin install reelagentic@reelagentic
 ```
 
-Start a new Claude Code session and run `/reel-maker:setup`. It installs the render engine into
-`~/.reel-maker/`, sets up the person cut-out (compiles the Apple Vision helper on macOS, downloads
+Start a new Claude Code session and run `/reelagentic:setup`. It installs the render engine into
+`~/.reelagentic/`, sets up the person cut-out (compiles the Apple Vision helper on macOS, downloads
 MediaPipe's two small models on Windows), downloads a Whisper model (it asks first) and creates your
 Studio folder. Already have a video workspace with grade files or
-[video-use](https://github.com/browser-use/video-use)? Pass it with `--workspace` and Reel Maker
+[video-use](https://github.com/browser-use/video-use)? Pass it with `--workspace` and ReelAgentic
 imports the grades and uses its timeline view and Manim animations.
 
 ## Use
 
 ```
-/reel-maker:edit ~/Movies/take.mp4 fitness tips, energetic, text behind me, follow CTA at the end
-/reel-maker:match-style <reel file or URL>        # learn a reference reel's style
-/reel-maker:new-effect a spinning vinyl record with my logo   # Claude builds a new effect and saves it
+/reelagentic:edit ~/Movies/take.mp4 fitness tips, energetic, text behind me, follow CTA at the end
+/reelagentic:match-style <reel file or URL>        # learn a reference reel's style
+/reelagentic:new-effect a spinning vinyl record with my logo   # Claude builds a new effect and saves it
 ```
 
 Every edit goes: transcribe → cut → storyboard → your changes in plain words → final render. For the
@@ -101,8 +103,8 @@ best results use Opus at high effort.
 | Label songs: upload copy without music + preview with it | `"music": {"labelSong": true}` |
 | Instagram finishing: -14 LUFS loudness, 320 kbps audio, UI safe-zone checks, cover safe in the 4:5 grid | `scripts/render.py final` |
 | Storyboard before render | `scripts/render.py storyboard` → contact sheet |
-| Reference-reel style match and "my style" memory | `/reel-maker:match-style`, `<Studio>/styles/`, `<Studio>/my-style.md` |
-| Custom effects Claude designs for you | `/reel-maker:new-effect` → `<Studio>/custom-effects/*.tsx`, auto-registered |
+| Reference-reel style match and "my style" memory | `/reelagentic:match-style`, `<Studio>/styles/`, `<Studio>/my-style.md` |
+| Custom effects Claude designs for you | `/reelagentic:new-effect` → `<Studio>/custom-effects/*.tsx`, auto-registered |
 | App and website logos | `scripts/fetch_logo.py <domain>` |
 | Reel cover + post caption | rendered with every final export |
 
@@ -117,8 +119,8 @@ flight, map pins, location tag, face lock-on, reels orbiting your head and spotl
 
 ```
 .claude-plugin/   plugin + marketplace manifests
-commands/         /reel-maker:edit, :setup, :match-style, :new-effect
-skills/reel-maker the editing workflow Claude follows
+commands/         /reelagentic:edit, :setup, :match-style, :new-effect
+skills/reelagentic the editing workflow Claude follows
 scripts/          transcribe, cut, vision (Swift), render, catalog, sfx, setup
 engine/           Remotion project: Reel + Cover compositions, captions, looks, effects
 ```

@@ -97,7 +97,7 @@ def bridges(ws, studio: Path, old: dict) -> dict:
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--studio", default=str(Path.home() / "Documents" / "Reel Maker Studio"))
+    ap.add_argument("--studio", default=str(Path.home() / "Documents" / "ReelAgentic Studio"))
     ap.add_argument("--model", default="small")
     ap.add_argument("--model-path")
     ap.add_argument("--workspace", help="existing video workspace to bridge (grades, video-use, OpenHiggsfield)")
@@ -166,7 +166,7 @@ def main():
         (studio / d).mkdir(parents=True, exist_ok=True)
     readme = studio / "README.md"
     if not readme.exists():
-        readme.write_text("# Reel Maker Studio\n\nClaude checks this folder before every edit.\n\n"
+        readme.write_text("# ReelAgentic Studio\n\nClaude checks this folder before every edit.\n\n"
                           + "\n".join(f"- `{d}/`: {w}" for d, w in STUDIO_DIRS.items()) + "\n", encoding="utf-8")
     if not (studio / "brand" / "brand.json").exists():
         (studio / "brand" / "brand.json").write_text(json.dumps(BRAND, indent=2) + "\n", encoding="utf-8")

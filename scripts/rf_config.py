@@ -1,4 +1,4 @@
-"""Shared paths for Reel Maker scripts. Config lives in ~/.reel-maker/config.json (written by setup.py)."""
+"""Shared paths for ReelAgentic scripts. Config lives in ~/.reelagentic/config.json (written by setup.py)."""
 import json
 import os
 import shutil
@@ -7,13 +7,13 @@ import sys
 from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parent.parent
-HOME = Path(os.environ.get("REEL_MAKER_HOME", Path.home() / ".reel-maker"))
+HOME = Path(os.environ.get("REELAGENTIC_HOME", Path.home() / ".reelagentic"))
 CONF = HOME / "config.json"
 
 
 def load() -> dict:
     if not CONF.exists():
-        sys.exit("Reel Maker is not set up yet. Run /reel-maker:setup first.")
+        sys.exit("ReelAgentic is not set up yet. Run /reelagentic:setup first.")
     c = json.loads(CONF.read_text(encoding="utf-8"))
     c.setdefault("engine", str(HOME / "engine"))
     c.setdefault("bin", str(HOME / "bin"))
